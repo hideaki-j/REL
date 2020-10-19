@@ -86,7 +86,7 @@ class MentionDetection(MentionDetectionBase):
                     continue
                 # Match gt to sentence.
                 #pos_start = text.find(sent) # Commented out (issue #49)
-                pos_start = text[pos_end:].find(sent) + pos_end # Added  (issue #49) test test 
+                pos_start = text[pos_end:].find(sent) + pos_end # Added  (issue #49)
                 pos_end = pos_start + len(sent)
 
                 # ngram, start_pos, end_pos
