@@ -87,19 +87,24 @@ def process_results(
 
         res_doc = []
         offset = 0  # Added (issue #49)
+        prev_sent = ''
+        prev_idx = 0
 
         for pred, ment in zip(pred_doc, ment_doc):
             sent = ment["sentence"]
-
+            idx = ment['sent_idx']
+            if sent != prev_sent or idx != prev_idx:
+                offset += len(prev_sent)
             # Only adjust position if using Flair NER tagger.
             if include_offset:
                 # offset = text.find(sent) # Commented out (issue #49)
-                offset = text[offset:].find(sent) + offset  # Added (issue #49)
+                offset = text.find(sent, offset) # Commented out (issue #49)
             # else: # Commented out (issue #49)
             # offset = 0 # Commented out (issue #49)
             start_pos = offset + ment["pos"]
             mention_length = int(ment["end_pos"] - ment["pos"])
-            offset += len(sent)
+            prev_sent = sent
+            prev_idx = idx
 
             # self.verify_pos(ment["ngram"], start_pos, end_pos, text)
             if pred["prediction"] != "NIL":
