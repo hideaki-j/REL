@@ -63,29 +63,10 @@ def preprocess_mention(m, wiki_db):
 
     return cur_m
 
-def create_cum_offsets(sents, text):
-    """Responsible for calculating the start position. This func is used in process_results.
-    
-    """
-    cum_offsets = {0: 0}
-    # e.g. with 4 sentences, loop through 1, 2, 3 and skip 0
-    for idx in range(1, max(sents.keys())+1):
-        # current sentence text
-        cur_sent = sents[idx]
-        # length of previous sentence
-        prev_sent_len = len(sents[idx-1])
-        # number of chars up until now: previous sentence offset + length of previous sentence
-        until_now = cum_offsets[idx-1] + prev_sent_len
-        # total offset is until_now + whitespace compensation through .find(cur_sent)
-        #print(cum_offsets)
-        cum_offsets[idx] = until_now + text[until_now:].find(cur_sent)
-    return cum_offsets
-
 def process_results(
     mentions_dataset,
     predictions,
     processed,
-    sents,
     include_offset=False,
 ):
     """
@@ -102,8 +83,6 @@ def process_results(
         pred_doc = predictions[doc]
         ment_doc = mentions_dataset[doc]
         text = processed[doc][0]
-        if include_offset:
-            cum_offsets = create_cum_offsets(sents, text) # issue 49
 
         res_doc = []
         offset  = 0
@@ -112,7 +91,7 @@ def process_results(
 
             # Only adjust position if using Flair NER tagger.
             if include_offset:
-                offset = cum_offsets[ment["sent_idx"]] # Issue #49
+                offset = ment['offset']
             start_pos = offset + ment["pos"]
             mention_length = int(ment["end_pos"] - ment["pos"])
 

@@ -119,6 +119,7 @@ class MentionDetection(MentionDetectionBase):
             )
 
         # Verify if Flair, else ngram or custom.
+        org_dataset = dataset
         is_flair = isinstance(tagger, SequenceTagger)
         dataset, processed_sentences, splits = self.split_text(dataset, is_flair)
         results = {}
@@ -135,11 +136,17 @@ class MentionDetection(MentionDetectionBase):
             sentences_doc = [v[0] for v in contents.values()]
             sentences = processed_sentences[splits[i] : splits[i + 1]]
             result_doc = []
-            sents = {} # issue #49
+            
+            offset = 0 # Issue #49
+            input_text = org_dataset[doc][0] # Issue #49
+            prev_sentence = ''# Issue #49 
             
             for (idx_sent, (sentence, ground_truth_sentence)), snt in zip(
                 contents.items(), sentences
             ):
+                
+                offset = input_text.find(sentence,len(prev_sentence)+offset) # Issue #49
+                
                 for entity in (
                     snt.get_spans("ner")
                     if is_flair
@@ -178,10 +185,12 @@ class MentionDetection(MentionDetectionBase):
                         "sentence": sentence,
                         "conf_md": conf,
                         "tag": tag,
+                        "offset":offset,
                     }
 
                     result_doc.append(res)
-                sents[idx_sent] = sentence # issue #49
+                
+                prev_sentence = sentence # Issue #49
             results[doc] = result_doc
         
-        return results, total_ment, sents
+        return results, total_ment
