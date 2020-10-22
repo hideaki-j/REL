@@ -117,7 +117,7 @@ def make_handler(base_url, wiki_version, model, tagger_ner):
             else:
                 # EL
                 processed = {API_DOC: [text, spans]}
-                mentions_dataset, total_ment = self.mention_detection.find_mentions(
+                mentions_dataset, total_ment, sents = self.mention_detection.find_mentions(
                     processed, self.tagger_ner
                 )
 
@@ -129,6 +129,7 @@ def make_handler(base_url, wiki_version, model, tagger_ner):
                 mentions_dataset,
                 predictions,
                 processed,
+                sents=None if (len(spans) > 0) else sents,
                 include_offset=False if ((len(spans) > 0) or self.custom_ner) else True,
             )
 

@@ -110,6 +110,7 @@ class MentionDetection(MentionDetectionBase):
         it returns the mention, its left/right context and a set of candidates.
 
         :return: Dictionary with mentions per document.
+                 "sent" will be used to calculate the start position, in utils.py - process_results.
         """
 
         if tagger is None:
@@ -122,6 +123,7 @@ class MentionDetection(MentionDetectionBase):
         dataset, processed_sentences, splits = self.split_text(dataset, is_flair)
         results = {}
         total_ment = 0
+        
 
         # mini_batch_size default 32. Only if Flair for higher performance (GPU),
         # else predict on a sentence-level.
@@ -133,7 +135,8 @@ class MentionDetection(MentionDetectionBase):
             sentences_doc = [v[0] for v in contents.values()]
             sentences = processed_sentences[splits[i] : splits[i + 1]]
             result_doc = []
-
+            sents = {} # issue #49
+            
             for (idx_sent, (sentence, ground_truth_sentence)), snt in zip(
                 contents.items(), sentences
             ):
@@ -178,7 +181,7 @@ class MentionDetection(MentionDetectionBase):
                     }
 
                     result_doc.append(res)
-
+                sents[idx_sent] = sentence # issue #49
             results[doc] = result_doc
-
-        return results, total_ment
+        
+        return results, total_ment, sents
